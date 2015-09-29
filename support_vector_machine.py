@@ -1,10 +1,19 @@
-from cvxopt.solvers import qp
+import math
+
 from cvxopt.base import matrix
-import numpy, pylab, random, math
+
+from cvxopt.solvers import qp
+import numpy
+
+from functools import partial
 
 
 class SupportVectorMachine:
     def __init__(self, data_points):
+        self.kernel = partial(self.polynomial_kernel, p=3)
+        # self.kernel = self.linear_kernel
+        # self.kernel = self.radial_basis_kernel
+        # self.kernel = self.sigmoid_kernel
         self.p = self.build_p_matrix(data_points)
         self.q = self.build_q_vector(len(data_points))
         self.h = self.build_h_vector(len(data_points))
@@ -16,7 +25,7 @@ class SupportVectorMachine:
     def linear_kernel(self, x, y):
         return numpy.transpose(x).dot(y) + 1
 
-    def polynomial_kernel(self, x, y, p):
+    def polynomial_kernel(self, x, y, p=2):
         return math.pow(numpy.transpose(x).dot(y) + 1, p)
 
     def radial_basis_kernel(self):
@@ -43,7 +52,7 @@ class SupportVectorMachine:
         p_matrix = numpy.empty([len(data_points), len(data_points)])
         for i, x_i in enumerate(data_points):
             for j, x_j in enumerate(data_points):
-                p_matrix[i][j] = x_i[2] * x_j[2] * self.polynomial_kernel(x_i[0:2], x_j[0:2], 3)
+                p_matrix[i][j] = x_i[2] * x_j[2] * self.kernel(x_i[0:2], x_j[0:2])
         return p_matrix
 
     def call_qp(self):
@@ -56,5 +65,5 @@ class SupportVectorMachine:
     def indicator(self, new_data_point):
         indicator_sum = 0
         for a, data_point in self.alpha_class:
-            indicator_sum += a * data_point[2] * self.polynomial_kernel(new_data_point[0:2], data_point[0:2], 3)
+            indicator_sum += a * data_point[2] * self.kernel(new_data_point[0:2], data_point[0:2])
         return indicator_sum

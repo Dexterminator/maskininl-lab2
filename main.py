@@ -1,6 +1,10 @@
-from support_vector_machine import SupportVectorMachine
+import random
+
 from cvxopt.base import matrix
-import numpy, pylab, random, math
+
+from support_vector_machine import SupportVectorMachine
+import numpy
+import pylab
 
 
 def main():
