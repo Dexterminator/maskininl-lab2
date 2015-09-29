@@ -9,11 +9,13 @@ from functools import partial
 
 
 class SupportVectorMachine:
-    def __init__(self, data_points):
-        self.kernel = partial(self.polynomial_kernel, p=3)
-        # self.kernel = self.linear_kernel
-        # self.kernel = self.radial_basis_kernel
-        # self.kernel = self.sigmoid_kernel
+    def __init__(self, data_points, kernel_id):
+        kernels = {1: self.linear_kernel, 2: partial(self.polynomial_kernel, p=2),
+                   3: partial(self.radial_basis_kernel, sigma=2), 4: partial(self.sigmoid_kernel, k=7, delta=-4)}
+        self.kernel = kernels[kernel_id]
+        # self.kernel = partial(self.polynomial_kernel, p=2)
+        # self.kernel = partial(self.radial_basis_kernel, sigma=2)
+        # self.kernel = partial(self.sigmoid_kernel, k=7, delta=-4)
         self.p = self.build_p_matrix(data_points)
         self.q = self.build_q_vector(len(data_points))
         self.h = self.build_h_vector(len(data_points))
@@ -25,14 +27,15 @@ class SupportVectorMachine:
     def linear_kernel(self, x, y):
         return numpy.transpose(x).dot(y) + 1
 
-    def polynomial_kernel(self, x, y, p=2):
+    def polynomial_kernel(self, x, y, p):
         return math.pow(numpy.transpose(x).dot(y) + 1, p)
 
-    def radial_basis_kernel(self):
-        pass
+    def radial_basis_kernel(self, x, y, sigma):
+        n = numpy.linalg.norm(numpy.array(x) - numpy.array(y))
+        return math.exp((-1) * n * n / (2 * sigma * sigma))
 
-    def sigmoid_kernel(self):
-        pass
+    def sigmoid_kernel(self, x, y, k, delta):
+        return numpy.tanh(k * numpy.transpose(x).dot(y) - delta)
 
     def build_q_vector(self, n):
         q = numpy.empty(n)

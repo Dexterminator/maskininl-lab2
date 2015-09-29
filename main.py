@@ -11,9 +11,17 @@ def main():
     classA, classB = setup_data()
     data = classA + classB
     random.shuffle(data)
-    machine = SupportVectorMachine(data)
+    plot(classA, classB, data, 1)
+    plot(classA, classB, data, 2)
+    plot(classA, classB, data, 3)
+    # plot(classA, classB, data, 4)
+
+
+def plot(classA, classB, data, kernel):
+    machine = SupportVectorMachine(data, kernel)
     plot_decision_boundary(machine)
     plot_data_points(classA, classB)
+    pylab.clf()
 
 
 def setup_data():
