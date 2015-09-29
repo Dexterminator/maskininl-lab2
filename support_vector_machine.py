@@ -5,12 +5,13 @@ import numpy, pylab, random, math
 
 class SupportVectorMachine:
     def __init__(self, data_points):
-        self.data_points = data_points
         self.p = self.build_p_matrix(data_points)
         self.q = self.build_q_vector(len(data_points))
         self.h = self.build_h_vector(len(data_points))
         self.g = self.build_g_matrix(len(data_points))
-        self.alphas = self.call_qp()
+        alphas = self.call_qp()
+        self.alpha_class = self.without_zeroes(zip(alphas, data_points))
+        print(self.alpha_class)
 
     def linear_kernel(self, x, y):
         return numpy.transpose(x).dot(y) + 1
@@ -42,12 +43,18 @@ class SupportVectorMachine:
         p_matrix = numpy.empty([len(data_points), len(data_points)])
         for i, x_i in enumerate(data_points):
             for j, x_j in enumerate(data_points):
-                p_matrix[i][j] = x_i[2] * x_j[2] * self.linear_kernel(x_i[0:2], x_j[0:2])
+                p_matrix[i][j] = x_i[2] * x_j[2] * self.polynomial_kernel(x_i[0:2], x_j[0:2], 3)
         return p_matrix
 
     def call_qp(self):
         r = qp(matrix(self.p), matrix(self.q), matrix(self.g), matrix(self.h))
         return list(r['x'])
 
-    def without_zeroes(self, alphas):
-        return [a for a in alphas if abs(a) < 1e-5]
+    def without_zeroes(self, alpha_classes):
+        return [(a, data_point) for a, data_point in alpha_classes if abs(a) > 1e-5]
+
+    def indicator(self, new_data_point):
+        indicator_sum = 0
+        for a, data_point in self.alpha_class:
+            indicator_sum += a * data_point[2] * self.polynomial_kernel(new_data_point[0:2], data_point[0:2], 3)
+        return indicator_sum
