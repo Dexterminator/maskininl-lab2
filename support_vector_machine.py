@@ -10,8 +10,13 @@ from functools import partial
 
 class SupportVectorMachine:
     def __init__(self, data_points, kernel_id):
-        kernels = {1: self.linear_kernel, 2: partial(self.polynomial_kernel, p=2),
-                   3: partial(self.radial_basis_kernel, sigma=2), 4: partial(self.sigmoid_kernel, k=7, delta=-4)}
+        kernels = {1: self.linear_kernel,
+                   2: partial(self.polynomial_kernel, p=2),
+                   3: partial(self.polynomial_kernel, p=3),
+                   4: partial(self.polynomial_kernel, p=4),
+                   5: partial(self.radial_basis_kernel, sigma=1),
+                   6: partial(self.radial_basis_kernel, sigma=2),
+                   7: partial(self.radial_basis_kernel, sigma=3)}
         self.kernel = kernels[kernel_id]
         self.p = self.build_p_matrix(data_points)
         self.q = self.build_q_vector(len(data_points))
